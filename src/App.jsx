@@ -1,30 +1,46 @@
-import useCounterStore from './store/useCounterStore';
-import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import UserLayout from './components/UserLayout';
+import AdminLayout from './components/AdminLayout';
+
+import HomePage from './pages/user/HomePage';
+import SignupPage from './pages/user/SignupPage';
+import LoginPage from './pages/user/LoginPage';
+import ProfilePage from './pages/user/ProfilePage';
+import ResultsPage from './pages/user/ResultsPage';
+
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminNoticesPage from './pages/admin/AdminNoticesPage';
+import AdminCrawlPage from './pages/admin/AdminCrawlPage';
+import AdminNoticeDetailPage from './pages/admin/AdminNoticeDetailPage';
 
 function App() {
-  // Zustand 스토어에서 상태와 함수를 꺼내 씁니다.
-  const count = useCounterStore((state) => state.count);
-  const increase = useCounterStore((state) => state.increase);
-  const reset = useCounterStore((state) => state.reset);
-
   return (
-    <div className="App">
-      <h1>f5 Frontend</h1>
-      <p>React + Vite + Zustand + Axios 초기 세팅 완료 ✅</p>
+    <BrowserRouter>
+      <Routes>
+        {/* 사용자 페이지 */}
+        <Route element={<UserLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/results" element={<ResultsPage />} />
+        </Route>
 
-      <div className="card">
-        <button type="button" onClick={increase}>
-          count is {count}
-        </button>
-        <button type="button" onClick={reset} style={{ marginLeft: 8 }}>
-          reset
-        </button>
-      </div>
+        {/* 관리자 로그인: 공통 레이아웃 적용 안 함 */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
-      <p className="read-the-docs">
-        버튼을 누르면 Zustand 전역 상태의 숫자가 올라갑니다.
-      </p>
-    </div>
+        {/* 관리자 페이지: 공통 레이아웃 적용 */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/notices" element={<AdminNoticesPage />} />
+          <Route path="/admin/crawl" element={<AdminCrawlPage />} />
+          <Route
+            path="/admin/notices/:id"
+            element={<AdminNoticeDetailPage />}
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
