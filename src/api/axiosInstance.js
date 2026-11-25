@@ -5,11 +5,12 @@ import { mockAdapter } from './mockAdapter';
 // baseURL은 .env 파일의 VITE_API_BASE_URL 값을 사용하고,
 // 값이 없으면 '/api/v1'을 기본값으로 씁니다. (.env.example 참고)
 // VITE_USE_MOCK=true 이면 실제 서버 대신 더미 데이터로 응답합니다.
+// 백엔드가 준비되기 전이라 값이 없으면 Mock을 기본으로 씁니다. 실제 서버를 쓰려면 false로 두세요.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  ...(import.meta.env.VITE_USE_MOCK === 'true' && { adapter: mockAdapter }),
+  ...((import.meta.env.VITE_USE_MOCK ?? 'true') === 'true' && { adapter: mockAdapter }),
 });
 
 // 로그인 후 토큰을 넘기면 모든 요청에 자동으로 붙습니다. null을 넘기면 제거합니다.

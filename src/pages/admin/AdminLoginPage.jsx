@@ -1,26 +1,41 @@
 // A-000 관리자 로그인
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, Field } from '../../components/ui';
+import { adminLogin } from '../../api';
+import useAuthStore from '../../store/useAuthStore';
+import { getErrorMessage } from '../../utils/format';
 
 function AdminLoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const setSession = useAuthStore((state) => state.setSession);
   const [adminId, setAdminId] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setLoginError('');
 
     if (!adminId.trim() || !password) {
-      setLoginError('아이디와 비밀번호를 입력해 주세요.');
+      setLoginError('이메일과 비밀번호를 입력해 주세요.');
       return;
     }
 
-    // 실제 관리자 로그인 API 연동은 추후 진행 (지금은 바로 공고 관리로 이동)
-    navigate('/admin/notices');
+    // API-012 관리자 로그인 (Mock: admin@gachon.ac.kr / Admin1234!)
+    setIsSubmitting(true);
+    try {
+      const session = await adminLogin({ email: adminId.trim(), password });
+      setSession(session);
+      navigate(location.state?.from ?? '/admin/notices', { replace: true });
+    } catch (error) {
+      setLoginError(getErrorMessage(error, '로그인하지 못했습니다.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,8 +51,10 @@ function AdminLoginPage() {
         <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-5">
           <Field
             id="adminId"
-            label="아이디"
-            placeholder="관리자 아이디"
+            label="이메일"
+            type="email"
+            autoComplete="username"
+            placeholder="admin@gachon.ac.kr"
             required
             value={adminId}
             onChange={(event) => {
@@ -50,6 +67,7 @@ function AdminLoginPage() {
             id="adminPassword"
             label="비밀번호"
             type="password"
+            autoComplete="current-password"
             placeholder="비밀번호를 입력하세요"
             required
             value={password}
@@ -66,7 +84,9 @@ function AdminLoginPage() {
           )}
 
           <div className="[&>button]:w-full">
-            <Button type="submit">로그인</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? '로그인 중...' : '로그인'}
+            </Button>
           </div>
         </form>
       </section>
