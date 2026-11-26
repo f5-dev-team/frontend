@@ -1,16 +1,14 @@
 import { Link, Outlet } from 'react-router-dom';
+import Header from './Header';
 
 function AdminLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
-        <Link
-          to="/admin/notices"
-          className="text-xl font-bold text-blue-600"
-        >
-          성실한두반장 관리자
-        </Link>
-      </header>
+      <Header
+        title="장학핏 관리자"
+        homePath="/admin/notices"
+        variant="admin"
+      />
 
       <div className="flex min-h-[calc(100vh-65px)]">
         <aside className="w-60 border-r border-gray-200 bg-white p-6">
