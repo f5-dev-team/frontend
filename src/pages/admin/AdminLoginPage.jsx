@@ -8,7 +8,7 @@ function AdminLoginPage() {
       </h1>
 
       <p className="mt-4 text-gray-600">
-        성실한두반장 관리자 로그인 페이지입니다.
+        장학핏 관리자 로그인 페이지입니다.
       </p>
     </main>
   );
