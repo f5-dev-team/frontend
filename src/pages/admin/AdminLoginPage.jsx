@@ -42,7 +42,7 @@ function AdminLoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <section className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 sm:p-10">
         <h1 className="text-2xl font-bold text-blue-600">
-          성실한두반장 관리자
+          마이핏 관리자
         </h1>
         <p className="mt-2 text-sm text-gray-500">
           관리자 계정으로 로그인해 주세요.

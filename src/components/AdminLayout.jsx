@@ -17,7 +17,7 @@ function AdminLayout() {
           to="/admin/notices"
           className="text-xl font-bold text-blue-600"
         >
-          성실한두반장 관리자
+          마이핏 관리자
         </Link>
 
         <button
