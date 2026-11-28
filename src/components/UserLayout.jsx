@@ -34,6 +34,13 @@ function UserLayout() {
             >
               회원가입
             </Link>
+
+            <Link
+              to="/admin/login"
+              className="text-gray-400 hover:text-blue-600"
+            >
+              관리자
+            </Link>
           </nav>
         </div>
       </header>

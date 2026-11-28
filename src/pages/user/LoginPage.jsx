@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Field } from '../../components/ui';
-import { login } from '../../api';
+import { adminLogin, login } from '../../api';
 import useAuthStore from '../../store/useAuthStore';
 import { getErrorMessage } from '../../utils/format';
 
@@ -38,7 +38,14 @@ function LoginPage() {
       setSession(session);
       navigate('/profile', { replace: true });
     } catch (error) {
-      setLoginError(getErrorMessage(error, '로그인하지 못했습니다.'));
+      // 관리자 계정으로 이 화면에서 로그인한 경우 관리자 화면으로 보낸다.
+      try {
+        const adminSession = await adminLogin({ email: email.trim(), password });
+        setSession(adminSession);
+        navigate('/admin/notices', { replace: true });
+      } catch {
+        setLoginError(getErrorMessage(error, '로그인하지 못했습니다.'));
+      }
     } finally {
       setIsSubmitting(false);
     }

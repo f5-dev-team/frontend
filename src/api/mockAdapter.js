@@ -122,7 +122,7 @@ const normalizeEmail = (email) => String(email ?? '').trim().toLowerCase();
 
 const findAccount = (body) => {
   const email = normalizeEmail(body.email);
-  const user = users.find((item) => item.email === email && item.password === body.password);
+  const user = users.find((item) => item.email === email && item.password === String(body.password ?? '').trim());
   if (!user) throw authenticationFailed();
   return user;
 };
