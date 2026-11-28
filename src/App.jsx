@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import UserLayout from './components/UserLayout';
 import AdminLayout from './components/AdminLayout';
+import RequireAdmin from './components/RequireAdmin';
 
 import HomePage from './pages/user/HomePage';
 import SignupPage from './pages/user/SignupPage';
@@ -30,14 +31,16 @@ function App() {
         {/* 관리자 로그인: 공통 레이아웃 적용 안 함 */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        {/* 관리자 페이지: 공통 레이아웃 적용 */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/notices" element={<AdminNoticesPage />} />
-          <Route path="/admin/crawl" element={<AdminCrawlPage />} />
-          <Route
-            path="/admin/notices/:id"
-            element={<AdminNoticeDetailPage />}
-          />
+        {/* 관리자 페이지: 로그인 확인 + 공통 레이아웃 적용 */}
+        <Route element={<RequireAdmin />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/notices" element={<AdminNoticesPage />} />
+            <Route path="/admin/crawl" element={<AdminCrawlPage />} />
+            <Route
+              path="/admin/notices/:id"
+              element={<AdminNoticeDetailPage />}
+            />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

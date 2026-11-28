@@ -1,15 +1,32 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/useAuthStore';
 
 function AdminLayout() {
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login', { replace: true });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
+      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
         <Link
           to="/admin/notices"
           className="text-xl font-bold text-blue-600"
         >
-          성실한두반장 관리자
+          마이핏 관리자
         </Link>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="text-sm text-gray-500 hover:text-gray-700"
+        >
+          로그아웃
+        </button>
       </header>
 
       <div className="flex min-h-[calc(100vh-65px)]">

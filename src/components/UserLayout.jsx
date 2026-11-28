@@ -10,7 +10,7 @@ function UserLayout() {
             to="/"
             className="text-center text-xl font-bold text-blue-600 sm:text-left"
           >
-            성실한두반장
+            마이핏
           </Link>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm sm:text-base">
@@ -33,6 +33,13 @@ function UserLayout() {
               className="text-gray-700 hover:text-blue-600"
             >
               회원가입
+            </Link>
+
+            <Link
+              to="/admin/login"
+              className="text-gray-400 hover:text-blue-600"
+            >
+              관리자
             </Link>
           </nav>
         </div>

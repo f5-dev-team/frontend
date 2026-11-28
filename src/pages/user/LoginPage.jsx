@@ -1,15 +1,21 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button, Field } from '../../components/ui';
+import { adminLogin, login } from '../../api';
+import useAuthStore from '../../store/useAuthStore';
+import { getErrorMessage } from '../../utils/format';
 
 function LoginPage() {
+  const navigate = useNavigate();
+  const setSession = useAuthStore((state) => state.setSession);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRemembered, setIsRemembered] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setLoginError('');
 
@@ -25,10 +31,24 @@ function LoginPage() {
       return;
     }
 
-    // 실제 로그인 API 연동은 추후 진행
-    console.log('입력한 이메일:', email);
-    console.log('비밀번호 입력 여부:', password.length > 0);
-    console.log('로그인 상태 유지:', isRemembered);
+    // API-002 사용자 로그인 (Mock: dummy1@gachon.ac.kr / Test1234!)
+    setIsSubmitting(true);
+    try {
+      const session = await login({ email: email.trim(), password });
+      setSession(session);
+      navigate('/profile', { replace: true });
+    } catch (error) {
+      // 관리자 계정으로 이 화면에서 로그인한 경우 관리자 화면으로 보낸다.
+      try {
+        const adminSession = await adminLogin({ email: email.trim(), password });
+        setSession(adminSession);
+        navigate('/admin/notices', { replace: true });
+      } catch {
+        setLoginError(getErrorMessage(error, '로그인하지 못했습니다.'));
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,7 +116,9 @@ function LoginPage() {
             )}
 
             <div className="[&>button]:w-full">
-              <Button type="submit">로그인</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? '로그인 중...' : '로그인'}
+              </Button>
             </div>
 
             <div className="flex items-center justify-center gap-4 text-sm">

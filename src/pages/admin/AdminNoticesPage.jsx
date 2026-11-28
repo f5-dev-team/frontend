@@ -1,50 +1,66 @@
-// A-001 관리자 공고 목록
+// A-001 관리자 공고 목록 (API-013)
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Badge, Button, Field, Select } from '../../components/ui';
-import { dummyNotices, noticeStatusMeta } from './noticesData';
+import { Badge, Field, Select } from '../../components/ui';
+import { getAdminScholarships } from '../../api';
+import { formatDate, formatDateTime, getErrorMessage } from '../../utils/format';
+import { getNoticeStatus, noticeStatusMeta } from './scholarshipStatus';
 
 const statusFilterOptions = [
   { value: 'all', label: '전체 상태' },
   { value: 'open', label: '모집중' },
-  { value: 'upcoming', label: '예정' },
   { value: 'closed', label: '마감' },
+  { value: 'failed', label: '처리 실패' },
+  { value: 'unknown', label: '기간 미정' },
 ];
 
 function AdminNoticesPage() {
+  const [notices, setNotices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  useEffect(() => {
+    let ignore = false;
+
+    getAdminScholarships({ page: 0, size: 100 })
+      .then((result) => {
+        if (!ignore) setNotices(result.items);
+      })
+      .catch((error) => {
+        if (!ignore) setLoadError(getErrorMessage(error, '공고 목록을 불러오지 못했습니다.'));
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   // 검색어/상태 필터를 적용한 공고 목록
   const filteredNotices = useMemo(() => {
     const trimmed = keyword.trim();
 
-    return dummyNotices.filter((notice) => {
-      const matchKeyword =
-        !trimmed ||
-        notice.title.includes(trimmed) ||
-        notice.organization.includes(trimmed);
+    return notices.filter((notice) => {
+      const matchKeyword = !trimmed || notice.title.includes(trimmed);
       const matchStatus =
-        statusFilter === 'all' || notice.status === statusFilter;
+        statusFilter === 'all' || getNoticeStatus(notice) === statusFilter;
 
       return matchKeyword && matchStatus;
     });
-  }, [keyword, statusFilter]);
+  }, [notices, keyword, statusFilter]);
 
   return (
     <main className="min-h-screen bg-slate-50 p-6 sm:p-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-600">
-            장학금 공고 관리
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            등록된 장학금 공고를 확인하고 관리합니다.
-          </p>
-        </div>
-
-        <Button>+ 새 공고 등록</Button>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-blue-600">장학금 공고 관리</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          수집된 장학금 공고를 확인하고 관리합니다.
+        </p>
       </div>
 
       {/* 검색/필터 */}
@@ -52,7 +68,7 @@ function AdminNoticesPage() {
         <Field
           id="search"
           label="검색"
-          placeholder="공고 제목 또는 기관명으로 검색"
+          placeholder="공고 제목으로 검색"
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
         />
@@ -72,52 +88,52 @@ function AdminNoticesPage() {
           <thead className="border-b border-gray-200 bg-gray-50 text-gray-600">
             <tr>
               <th className="px-4 py-3 font-semibold">제목</th>
-              <th className="px-4 py-3 font-semibold">기관</th>
               <th className="px-4 py-3 font-semibold">상태</th>
-              <th className="px-4 py-3 font-semibold">접수 기간</th>
+              <th className="px-4 py-3 font-semibold">마감 일시</th>
+              <th className="px-4 py-3 font-semibold">수집일</th>
               <th className="px-4 py-3 font-semibold text-right">관리</th>
             </tr>
           </thead>
           <tbody>
-            {filteredNotices.map((notice) => {
-              const meta = noticeStatusMeta[notice.status];
+            {!isLoading &&
+              !loadError &&
+              filteredNotices.map((notice) => {
+                const meta = noticeStatusMeta[getNoticeStatus(notice)];
 
-              return (
-                <tr
-                  key={notice.id}
-                  className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
-                >
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {notice.title}
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {notice.organization}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={meta.badge}>{meta.label}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">
-                    {notice.period}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      to={`/admin/notices/${notice.id}`}
-                      className="font-semibold text-blue-600 hover:underline"
-                    >
-                      상세
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
+                return (
+                  <tr
+                    key={notice.scholarshipId}
+                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-3 font-medium text-gray-900">{notice.title}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant={meta.badge}>{meta.label}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {formatDateTime(notice.applicationEndAt)}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{formatDate(notice.collectedAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        to={`/admin/notices/${notice.scholarshipId}`}
+                        className="font-semibold text-blue-600 hover:underline"
+                      >
+                        상세
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
 
-            {filteredNotices.length === 0 && (
+            {(isLoading || loadError || filteredNotices.length === 0) && (
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-10 text-center text-gray-400"
+                  className={`px-4 py-10 text-center ${loadError ? 'text-red-600' : 'text-gray-400'}`}
                 >
-                  조건에 맞는 공고가 없습니다.
+                  {isLoading
+                    ? '공고를 불러오는 중입니다...'
+                    : loadError || '조건에 맞는 공고가 없습니다.'}
                 </td>
               </tr>
             )}
@@ -125,9 +141,9 @@ function AdminNoticesPage() {
         </table>
       </div>
 
-      <p className="mt-4 text-sm text-gray-500">
-        총 {filteredNotices.length}건의 공고
-      </p>
+      {!isLoading && !loadError && (
+        <p className="mt-4 text-sm text-gray-500">총 {filteredNotices.length}건의 공고</p>
+      )}
     </main>
   );
 }
